@@ -4241,5 +4241,10 @@
   "Move down": "Descendre",
   "Click a shot to go to it, double-click to rename.": "Cliquez sur un plan pour y aller, double-cliquez pour le renommer.",
   "Back to live at the starting view": "Revenir au direct dans la vue de départ",
-  "Exit cockpit to fly to a bike share city": "Quittez le cockpit pour aller vers une ville avec vélos en libre-service"
+  "Exit cockpit to fly to a bike share city": "Quittez le cockpit pour aller vers une ville avec vélos en libre-service",
+  "Claude answers in chat only; voice is not available for this provider.": "Claude ne répond que dans la discussion ; la voix n'est pas disponible pour ce fournisseur.",
+  "Claude has no voice. Open CHAT to type instead.": "Claude n'a pas de voix. Ouvrez CHAT pour écrire à la place.",
+  "Claude typed chat": "Discussion écrite avec Claude",
+  "Open chat": "Ouvrir la discussion",
+  "This provider answers in chat only": "Ce fournisseur ne répond que dans la discussion"
 }

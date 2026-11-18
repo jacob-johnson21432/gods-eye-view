@@ -4138,5 +4138,10 @@
   "Move down": "Nach unten verschieben",
   "Click a shot to go to it, double-click to rename.": "Aufnahme anklicken, um zu ihr zu wechseln, Doppelklick zum Umbenennen.",
   "Back to live at the starting view": "Zurück zu Live in der Startansicht",
-  "Exit cockpit to fly to a bike share city": "Cockpit verlassen, um zu einer Stadt mit Bike-Sharing zu fliegen"
+  "Exit cockpit to fly to a bike share city": "Cockpit verlassen, um zu einer Stadt mit Bike-Sharing zu fliegen",
+  "Claude answers in chat only; voice is not available for this provider.": "Claude antwortet nur im Chat; Sprachsteuerung ist für diesen Anbieter nicht verfügbar.",
+  "Claude has no voice. Open CHAT to type instead.": "Claude hat keine Sprachsteuerung. CHAT öffnen, um stattdessen zu schreiben.",
+  "Claude typed chat": "Text-Chat mit Claude",
+  "Open chat": "Chat öffnen",
+  "This provider answers in chat only": "Dieser Anbieter antwortet nur im Chat"
 }

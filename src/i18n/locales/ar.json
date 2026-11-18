@@ -4550,5 +4550,10 @@
   "Move down": "نقل لأسفل",
   "Click a shot to go to it, double-click to rename.": "انقر على لقطة للانتقال إليها، وانقر عليها نقرًا مزدوجًا لإعادة تسميتها.",
   "Back to live at the starting view": "العودة إلى البث المباشر في العرض الأولي",
-  "Exit cockpit to fly to a bike share city": "اخرج من قمرة القيادة للانتقال إلى مدينة بها مشاركة دراجات"
+  "Exit cockpit to fly to a bike share city": "اخرج من قمرة القيادة للانتقال إلى مدينة بها مشاركة دراجات",
+  "Claude answers in chat only; voice is not available for this provider.": "يجيب Claude في الدردشة فقط؛ الصوت غير متاح لهذا المزوّد.",
+  "Claude has no voice. Open CHAT to type instead.": "لا يدعم Claude الصوت. افتح «دردشة» للكتابة بدلًا من ذلك.",
+  "Claude typed chat": "الدردشة النصية مع Claude",
+  "Open chat": "فتح الدردشة",
+  "This provider answers in chat only": "يجيب هذا المزوّد في الدردشة فقط"
 }

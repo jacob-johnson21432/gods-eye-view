@@ -4344,5 +4344,10 @@
   "Move down": "Перемістити вниз",
   "Click a shot to go to it, double-click to rename.": "Клацніть кадр, щоб перейти до нього, двічі — щоб перейменувати.",
   "Back to live at the starting view": "Повернутися до прямого ефіру в початковому вигляді",
-  "Exit cockpit to fly to a bike share city": "Вийдіть із кабіни, щоб перелетіти до міста з прокатом велосипедів"
+  "Exit cockpit to fly to a bike share city": "Вийдіть із кабіни, щоб перелетіти до міста з прокатом велосипедів",
+  "Claude answers in chat only; voice is not available for this provider.": "Claude відповідає лише в чаті; голосовий режим для цього постачальника недоступний.",
+  "Claude has no voice. Open CHAT to type instead.": "Claude не має голосового режиму. Відкрийте ЧАТ, щоб писати текстом.",
+  "Claude typed chat": "Текстовий чат із Claude",
+  "Open chat": "Відкрити чат",
+  "This provider answers in chat only": "Цей постачальник відповідає лише в чаті"
 }
