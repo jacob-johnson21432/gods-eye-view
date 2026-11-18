@@ -257,9 +257,17 @@ for (const [name, provider] of Object.entries(providers)) {
       assert.equal(url, 'https://api.anthropic.com/v1/messages');
       assert.equal(options.headers['x-api-key'], 'fixture-only');
       assert.equal(options.headers['anthropic-version'], '2023-06-01');
-      assert.equal(sent.model, 'claude-haiku-5-5');
-      assert.equal(sent.max_tokens, 4096);
-      assert.deepEqual(sent.thinking, { type: 'disabled' });
+      assert.equal(
+        options.headers['anthropic-beta'],
+        'thinking-binding-controls-2026-08-01',
+      );
+      assert.equal(sent.model, 'claude-opus-5-5');
+      assert.equal(sent.max_tokens, 16000);
+      assert.deepEqual(sent.thinking, {
+        type: 'adaptive',
+        block_binding: { prefix_mismatch_behavior: 'drop_block' },
+      });
+      assert.deepEqual(sent.output_config, { effort: 'low' });
       assert.equal(typeof sent.system, 'string');
       assert.deepEqual(sent.messages, provider.input.messages);
       assert.deepEqual(sent.tools, [
@@ -882,12 +890,78 @@ test('Anthropic replies keep only the blocks history can send back', async (t) =
     content: [{ type: 'text', text: 'Hi' }],
   });
   assert.equal(body.finishReason, 'end_turn');
-  const thinking = await fixture(
+  // Thinking blocks come back exactly as sent, extra fields aside.
+  const thought = [
+    { type: 'thinking', thinking: '', signature: 'sig', extra: 1 },
+    { type: 'redacted_thinking', data: 'opaque' },
+    { type: 'text', text: '' },
+    { type: 'tool_use', id: 'c', name: 'fly_to', input: { lat: 1 } },
+  ];
+  const thinking = await fixture(t, providers.anthropic, reply(thought));
+  const thinkingBody = await (await thinking.send()).json();
+  assert.deepEqual(thinkingBody.content.content, [
+    { type: 'thinking', thinking: '', signature: 'sig' },
+    { type: 'redacted_thinking', data: 'opaque' },
+    { type: 'tool_use', id: 'c', name: 'fly_to', input: { lat: 1 } },
+  ]);
+  // A thinking block without its signature cannot be sent back.
+  const unsigned = await fixture(
     t,
     providers.anthropic,
-    reply([{ type: 'thinking', thinking: '', signature: 's' }]),
+    reply([{ type: 'thinking', thinking: 'x' }]),
   );
-  assert.equal((await thinking.send()).status, 502);
+  assert.equal((await unsigned.send()).status, 502);
+});
+
+test('Anthropic history replays thinking blocks only from the assistant', async (t) => {
+  const f = await fixture(t, providers.anthropic);
+  const send = async (messages) => (await f.send({ messages })).status;
+  const think = { type: 'thinking', thinking: '', signature: 'sig' };
+  const calls = {
+    role: 'assistant',
+    content: [
+      think,
+      { type: 'redacted_thinking', data: 'opaque' },
+      { type: 'tool_use', id: 'a', name: 'fly_to', input: { lat: 1 } },
+    ],
+  };
+  const result = {
+    role: 'user',
+    content: [{ type: 'tool_result', tool_use_id: 'a', content: '{}' }],
+  };
+  assert.equal(
+    await send([{ role: 'user', content: 'Go' }, calls, result]),
+    200,
+  );
+  assert.deepEqual(f.calls[0].body.messages[1], calls);
+  // Not from the user, and not without a signature.
+  assert.equal(
+    await send([
+      { role: 'user', content: [think, { type: 'text', text: 'Hi' }] },
+    ]),
+    400,
+  );
+  const unsigned = structuredClone(calls);
+  delete unsigned.content[0].signature;
+  assert.equal(
+    await send([{ role: 'user', content: 'Go' }, unsigned, result]),
+    400,
+  );
+});
+
+test('Anthropic effort comes from ANTHROPIC_CHAT_EFFORT, else low', async (t) => {
+  for (const [value, effort] of [
+    ['high', 'high'],
+    [' max ', 'max'],
+    ['extreme', 'low'],
+    [undefined, 'low'],
+  ]) {
+    const f = await fixture(t, providers.anthropic, undefined, {
+      resolveEffort: () => value,
+    });
+    await f.send();
+    assert.deepEqual(f.calls[0].body.output_config, { effort });
+  }
 });
 
 test('parseUsage adds Anthropic cache tokens to input and needs both counts', () => {

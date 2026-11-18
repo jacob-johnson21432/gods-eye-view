@@ -7,6 +7,10 @@ import { resolveOverpassUpstreams } from '../overpass/constants.js';
 // The Anthropic chat route's provider throttle default
 // (GEV_RATELIMIT_ANTHROPIC_PER_MIN); there is no voice route to share it.
 export const ANTHROPIC_DEFAULT_PER_MIN = 30;
+export const ANTHROPIC_DEFAULT_MODEL = 'claude-opus-5-5';
+// Map commands want a quick answer; ANTHROPIC_CHAT_EFFORT raises it.
+export const ANTHROPIC_DEFAULT_EFFORT = 'low';
+const ANTHROPIC_EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'];
 
 const object = (value) =>
   value && typeof value === 'object' && !Array.isArray(value);
@@ -15,9 +19,28 @@ const keys = (value, allowed) =>
 const id = (value) =>
   typeof value === 'string' && value.length > 0 && value.length <= 1024;
 
-// Only text and tool exchanges may cross this route, never media or documents.
+const signed = (value) =>
+  typeof value === 'string' && value.length > 0 && value.length <= 65536;
+
+// Only text, tool exchanges and Claude's own thinking may cross this route,
+// never media or documents.
 function validBlock(block, role) {
   if (!object(block)) return false;
+  // Thinking is always on for current Claude models. Its blocks go back
+  // byte for byte; under the default display the `thinking` text is empty.
+  if (block.type === 'thinking')
+    return (
+      role === 'assistant' &&
+      keys(block, ['type', 'thinking', 'signature']) &&
+      typeof block.thinking === 'string' &&
+      signed(block.signature)
+    );
+  if (block.type === 'redacted_thinking')
+    return (
+      role === 'assistant' &&
+      keys(block, ['type', 'data']) &&
+      signed(block.data)
+    );
   if (block.type === 'text')
     return (
       keys(block, ['type', 'text']) &&
@@ -94,16 +117,24 @@ function validMessages(messages) {
 function replyBlock(block) {
   if (!object(block)) return null;
   const value =
-    block.type === 'text'
-      ? { type: 'text', text: block.text }
-      : block.type === 'tool_use'
-        ? {
-            type: 'tool_use',
-            id: block.id,
-            name: block.name,
-            input: block.input,
-          }
-        : null;
+    block.type === 'thinking'
+      ? {
+          type: 'thinking',
+          thinking: block.thinking,
+          signature: block.signature,
+        }
+      : block.type === 'redacted_thinking'
+        ? { type: 'redacted_thinking', data: block.data }
+        : block.type === 'text'
+          ? { type: 'text', text: block.text }
+          : block.type === 'tool_use'
+            ? {
+                type: 'tool_use',
+                id: block.id,
+                name: block.name,
+                input: block.input,
+              }
+            : null;
   return value && validBlock(value, 'assistant') ? value : null;
 }
 
@@ -114,7 +145,8 @@ export function createAnthropicChatHandler({
   // for voice.
   overpassConfigured = () => resolveOverpassUpstreams().length > 0,
   resolveChatModel = () =>
-    process.env.ANTHROPIC_CHAT_MODEL || 'claude-haiku-5-5',
+    process.env.ANTHROPIC_CHAT_MODEL || ANTHROPIC_DEFAULT_MODEL,
+  resolveEffort = () => process.env.ANTHROPIC_CHAT_EFFORT,
   resolveApiKey = () => process.env.ANTHROPIC_API_KEY,
   resolveProviderRateLimit = () => process.env.GEV_RATELIMIT_ANTHROPIC_PER_MIN,
   ...options
@@ -136,18 +168,32 @@ export function createAnthropicChatHandler({
       )
         return null;
       const overpass = overpassConfigured();
+      const effort = String(resolveEffort() ?? '').trim();
       return {
         endpoint: 'https://api.anthropic.com/v1/messages',
         headers: (key) => ({
           'x-api-key': key,
           'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'thinking-binding-controls-2026-08-01',
         }),
         body: {
           model,
-          max_tokens: 4096,
-          // Claude Haiku 5.5 thinks by default; chat history carries only
-          // text and tool blocks.
-          thinking: { type: 'disabled' },
+          // Thinking counts toward max_tokens.
+          max_tokens: 16000,
+          // Thinking can't be turned off on current Claude models (Opus 5.5
+          // answers 400), so effort sets how much it thinks. The text loop
+          // edits history (older tool results shrink, old turns drop), which
+          // invalidates thinking blocks after the edit; drop_block has the
+          // API skip those instead of refusing the request.
+          thinking: {
+            type: 'adaptive',
+            block_binding: { prefix_mismatch_behavior: 'drop_block' },
+          },
+          output_config: {
+            effort: ANTHROPIC_EFFORTS.includes(effort)
+              ? effort
+              : ANTHROPIC_DEFAULT_EFFORT,
+          },
           system: textInstructions(annotationGuidance, { overpass }),
           messages: input.messages,
           tools: offeredTools(tools, { overpass }).map(

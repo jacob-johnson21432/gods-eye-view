@@ -4138,5 +4138,10 @@
   "Move down": "Flytta ned",
   "Click a shot to go to it, double-click to rename.": "Klicka på en tagning för att gå till den, dubbelklicka för att byta namn.",
   "Back to live at the starting view": "Tillbaka till live i startvyn",
-  "Exit cockpit to fly to a bike share city": "Lämna cockpit för att flyga till en stad med lånecyklar"
+  "Exit cockpit to fly to a bike share city": "Lämna cockpit för att flyga till en stad med lånecyklar",
+  "Claude typed chat": "Textchatt med Claude",
+  "Claude answers in chat only; voice is not available for this provider.": "Claude svarar bara i chatten; röst är inte tillgängligt för den här leverantören.",
+  "Claude has no voice. Open CHAT to type instead.": "Claude har ingen röst. Öppna CHATT för att skriva i stället.",
+  "Open chat": "Öppna chatt",
+  "This provider answers in chat only": "Den här leverantören svarar bara i chatten"
 }

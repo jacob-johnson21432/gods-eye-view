@@ -1573,9 +1573,13 @@ API: OpenAI uses `OPENAI_CHAT_MODEL` (default `gpt-4.1-mini`) and needs an API
 key; Gemini sends a text-only `generateContent` request with
 `GEMINI_CHAT_MODEL` (default `gemini-3.5-flash-lite`) and never starts Live.
 Claude is chat only: it sends a Messages API request with
-`ANTHROPIC_CHAT_MODEL` (default `claude-haiku-5-5`) and thinking disabled, so
-the model must accept `thinking: {type: "disabled"}`; a `stop_reason` of
-`end_turn` ends a turn.
+`ANTHROPIC_CHAT_MODEL` (default `claude-opus-5-5`), adaptive thinking and
+`output_config.effort` from `ANTHROPIC_CHAT_EFFORT` (default `low`). Thinking
+blocks round-trip unchanged; because the chat loop shrinks older tool results
+and drops old turns, the request sets
+`thinking.block_binding.prefix_mismatch_behavior: "drop_block"` (beta
+`thinking-binding-controls-2026-08-01`) so an edited prefix drops stale
+thinking instead of failing. A `stop_reason` of `end_turn` ends a turn.
 Only one mode runs at a time: the microphone closes chat, and opening chat
 stops voice. Enter sends, Shift+Enter adds a line, and Up or Down at the start
 of the field recall recent messages and restore the draft. Attachments are up

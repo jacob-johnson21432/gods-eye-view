@@ -4241,5 +4241,10 @@
   "Move down": "הזזה למטה",
   "Click a shot to go to it, double-click to rename.": "לחץ על שוט כדי לעבור אליו, לחיצה כפולה לשינוי שם.",
   "Back to live at the starting view": "חזרה לשידור החי בתצוגת הפתיחה",
-  "Exit cockpit to fly to a bike share city": "צא מתא הטייס כדי לטוס לעיר עם שיתוף אופניים"
+  "Exit cockpit to fly to a bike share city": "צא מתא הטייס כדי לטוס לעיר עם שיתוף אופניים",
+  "Claude typed chat": "צ׳אט כתוב עם Claude",
+  "Claude answers in chat only; voice is not available for this provider.": "Claude עונה בצ׳אט בלבד; קול אינו זמין עבור ספק זה.",
+  "Claude has no voice. Open CHAT to type instead.": "ל-Claude אין קול. פתחו את צ׳אט כדי להקליד במקום זאת.",
+  "Open chat": "פתיחת צ׳אט",
+  "This provider answers in chat only": "ספק זה עונה בצ׳אט בלבד"
 }
